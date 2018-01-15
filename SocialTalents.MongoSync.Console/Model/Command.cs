@@ -54,9 +54,9 @@ namespace SocialTalents.MongoSync.Console.Model
 
         static Command()
         {
-            Parsing.Add("-c", (cmd, arg) => cmd.Connection = arg);
-            Parsing.Add("-f", (cmd, arg) => cmd.File = arg);
-            Parsing.Add("-q", (cmd, arg) => cmd.SearchQueryForExport = arg);
+            Parsing.Add("--conn", (cmd, arg) => cmd.Connection = arg);
+            Parsing.Add("--file", (cmd, arg) => cmd.File = arg);
+            Parsing.Add("--query", (cmd, arg) => cmd.SearchQueryForExport = arg);
         }
     }
 }

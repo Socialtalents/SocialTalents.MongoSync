@@ -9,7 +9,7 @@ namespace SocialTalents.MongoSync.Console.Model
         public override void Execute()
         {
             Program.Console("Usage:");
-            Program.Console("SocialTalents.MongoSync.Console <command> -c Connection [-f file] [-q 'query']");
+            Program.Console("SocialTalents.MongoSync.Console <command> --conn Connection [--file file] [--query 'query']");
             Program.Console("command        help    Display help");
             Program.Console("               Insert  insert file(s) specified");
             Program.Console("               Upsert  Upsert file(s) specified");

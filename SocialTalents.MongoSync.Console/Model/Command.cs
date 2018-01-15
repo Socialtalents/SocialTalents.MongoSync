@@ -10,7 +10,6 @@ namespace SocialTalents.MongoSync.Console.Model
         public CommandType CommandType { get; set; }
 
         public string File { get; set; }
-        public string Collection { get; set; }
         public string SearchQueryForExport { get; set; }
 
         public virtual void Execute()
@@ -20,13 +19,14 @@ namespace SocialTalents.MongoSync.Console.Model
 
         public virtual void Parse(string[] args)
         {
+            var parsingRules = ParsingRules();
             string lastSegment = null;
             foreach(var parameter in args)
             {
                 if (lastSegment == null)
                 {
                     string key = parameter.ToLower();
-                    if (Parsing.ContainsKey(key))
+                    if (parsingRules.ContainsKey(key))
                     {
                         lastSegment = key;
                     }
@@ -35,28 +35,30 @@ namespace SocialTalents.MongoSync.Console.Model
                 {
                     try
                     {
-                        Parsing[lastSegment](this, parameter);
+                        parsingRules[lastSegment](this, parameter);
                     }
                     catch (Exception ex)
                     {
                         Program.Console($"Cannot parse {lastSegment} parameter: {ex.Message}");
+                        throw ex;
                     }
+                    lastSegment = null;
                 }
             }
         }
 
         public virtual bool IsValid()
         {
-            return true;
+            throw new NotImplementedException("Need to be overriden");
         }
 
-        private static Dictionary<string, Action<Command, string>> Parsing = new Dictionary<string, Action<Command, string>>();
-
-        static Command()
+        protected virtual Dictionary<string, Action<Command, string>> ParsingRules()
         {
-            Parsing.Add("--conn", (cmd, arg) => cmd.Connection = arg);
-            Parsing.Add("--file", (cmd, arg) => cmd.File = arg);
-            Parsing.Add("--query", (cmd, arg) => cmd.SearchQueryForExport = arg);
+            var result = new Dictionary<string, Action<Command, string>>();
+            result.Add("--conn", (cmd, arg) => cmd.Connection = arg);
+            result.Add("--file", (cmd, arg) => cmd.File = arg);
+            result.Add("--query", (cmd, arg) => cmd.SearchQueryForExport = arg);
+            return result;
         }
     }
 }

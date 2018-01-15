@@ -40,5 +40,32 @@ namespace SocialTalents.MongoSync.XUnit
             Assert.Equal(type, c.CommandType);
             Assert.IsType(t, c);
         }
+
+        [Fact]
+        public void ValidImport()
+        {
+            Command c = new ImportCommand();
+            c.Parse("--conn mongocon --file *.json".Split(' '));
+            Assert.Equal("mongocon", c.Connection);
+            Assert.Equal("*.json", c.File);
+            Assert.True(c.IsValid());
+        }
+
+        [Fact]
+        public void ValidExport()
+        {
+            Command c = new ExportCommand();
+            c.Parse("--conn mongocon --file 3.Countries.json --query {}".Split(' '));
+            Assert.Equal("mongocon", c.Connection);
+            Assert.Equal("3.Countries.json", c.File);
+            Assert.Equal("{}", c.SearchQueryForExport);
+            Assert.True(c.IsValid());
+        }
+
+        [Fact]
+        public void DefaultCommand_IsValid_RequiresImplementation()
+        {
+            Assert.Throws<NotImplementedException>(() => new Command().IsValid());
+        }
     }
 }

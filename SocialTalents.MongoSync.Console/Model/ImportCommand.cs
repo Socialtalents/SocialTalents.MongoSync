@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,12 +31,19 @@ namespace SocialTalents.MongoSync.Console.Model
                 {
                     if (completedImports.ContainsKey(f.Name))
                     {
-                        Program.Console($"Skipping {f.Name}, already imported on {completedImports[f.Name].Imported.ToFileTimeUtc()}");
+                        Program.Console($"Skipping {f.Name}, already imported on {completedImports[f.Name].Imported.ToString("u")}");
                         continue;
                     }
 
-                    string collectionName = f.Name.Split('.')[1];
-                    Program.Console($"Importing {f.Name} to collection {collectionName}");
+                    var fileNameSplit = f.Name.Split('.');
+                    if (fileNameSplit.Length != 4)
+                    {
+                        throw new InvalidOperationException($"File {f.Name} do not have 4 components: [Order].[Collection].[Operation].json");
+                    }
+                    string collectionName = fileNameSplit[1];
+                    ImportMode importMode = Enum.Parse<ImportMode>(fileNameSplit[2], true);
+                    
+                    Program.Console($"Importing {f.Name} to collection {collectionName}, mode {importMode}");
 
 
                     SyncEntity importResult = new SyncEntity();
@@ -43,11 +51,26 @@ namespace SocialTalents.MongoSync.Console.Model
 
                     try
                     {
-                        var resultCode = Program.Exec(COMMAND, $"{ConnectionString.ToCommandLine()} --collection {collectionName} --type json --mode insert --stopOnError --file {f.Name}");
-                        if (resultCode != 0)
+                        switch (importMode)
                         {
-                            throw new InvalidOperationException($"mongoimport result code {resultCode}, interrupting");
+                            case ImportMode.Drop:
+                                dropCollection(collectionName);
+                                break;
+                            case ImportMode.Delete:
+                                deleteFromCollection(collectionName, f);
+                                break;
+                            case ImportMode.Insert:
+                            case ImportMode.Upsert:
+                            case ImportMode.Merge:
+                                var resultCode = Program.Exec(COMMAND, $"{ConnectionString.ToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
+                                if (resultCode != 0)
+                                {
+                                    throw new InvalidOperationException($"mongoimport result code {resultCode}, interrupting");
+                                }
+                                break;
+                            default: throw new InvalidOperationException($"Import mode {importMode} not implemented yet");
                         }
+                        importResult.Success = true;
                     }
                     finally
                     {
@@ -62,17 +85,41 @@ namespace SocialTalents.MongoSync.Console.Model
             }
         }
 
+        private void deleteFromCollection(string collectionName, FileInfo f)
+        {
+            var deleteCommand = System.IO.File.ReadAllLines(f.FullName);
+            foreach(string delete in deleteCommand)
+            {
+                if (!string.IsNullOrEmpty(delete))
+                {
+                    Program.Console($"Deleting from  {collectionName}: {delete}");
+                    var deleteResult = MongoDatabase.GetCollection<BsonDocument>(collectionName).DeleteMany(delete);
+                    Program.Console($"Deleted from  {collectionName}: {deleteResult.DeletedCount} documents deleted");
+                }
+            }
+            
+        }
+
+        private void dropCollection(string collectionName)
+        {
+            Program.Console($"Dropping collection {collectionName}");
+            MongoDatabase.DropCollection(collectionName);
+            Program.Console($"Collection {collectionName} dropped");
+
+        }
+
         public const string COMMAND = "mongoimport";
         public const string SyncCollectionName = "_mongoSync";
 
         public Func<Dictionary<string, SyncEntity>> ReadCompletedImports { get; set; }
+        public IMongoDatabase MongoDatabase { get; private set; }
         public IMongoCollection<SyncEntity> SyncCollection { get; private set; }
 
         // Wrapping intp function to override for testing, no plan to unit test this
         public Dictionary<string, SyncEntity> ReadCompletedImportsDefault()
         {
             Program.Console($"Reading information about completed imports from {SyncCollectionName}");
-            var completedImports = SyncCollection.Find((f) => true).ToEnumerable();
+            var completedImports = SyncCollection.Find((f) => f.Success).ToEnumerable();
             var result = completedImports.ToDictionary(e => e.FileName, e => e);
             Program.Console($"{result.Count} imported items found");
             return result;
@@ -99,8 +146,8 @@ namespace SocialTalents.MongoSync.Console.Model
 
             // try to connect
             var mongoClient = new MongoClient(Connection);
-            var database = mongoClient.GetDatabase(ConnectionString.Database);
-            SyncCollection = database.GetCollection<SyncEntity>(SyncCollectionName);
+            MongoDatabase = mongoClient.GetDatabase(ConnectionString.Database);
+            SyncCollection = MongoDatabase.GetCollection<SyncEntity>(SyncCollectionName);
         }
     }
 }

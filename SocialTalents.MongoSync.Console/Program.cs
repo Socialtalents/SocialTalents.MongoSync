@@ -49,17 +49,19 @@ namespace SocialTalents.MongoSync.Console
                 try
                 {
                     Command candidate = new HelpCommand();
-                    CommandType cmdType = (CommandType)Enum.Parse(typeof(CommandType), args[0], true);
+                    CommandType cmdType = Enum.Parse<CommandType>(args[0], true);
                     switch (cmdType)
                     {
-                        case CommandType.Help: candidate = new HelpCommand(); break;
-                        case CommandType.Insert:
-                        // not supported yet case CommandType.Merge:
-                        // not supported yet case CommandType.Upsert:
-                            candidate = new ImportCommand(); break;
+                        case CommandType.Help:
+                            candidate = new HelpCommand();
+                            break;
+                        case CommandType.Import:
+                            candidate = new ImportCommand();
+                            break;
                         case CommandType.Export:
-                            candidate = new ExportCommand(); break;
-                        default: throw new NotImplementedException();
+                            candidate = new ExportCommand();
+                            break;
+                        default: throw new NotImplementedException($"Command {cmdType} not implemented yet");
                     }
                     candidate.CommandType = cmdType;
                     candidate.Parse(args);

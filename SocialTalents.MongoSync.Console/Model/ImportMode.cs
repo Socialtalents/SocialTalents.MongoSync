@@ -4,11 +4,13 @@ using System.Text;
 
 namespace SocialTalents.MongoSync.Console.Model
 {
-    public enum CommandType
+    public enum ImportMode
     {
-        None = 0,
-        Import,
-        Export,
-        Help    
+        Unknown = 0,
+        Insert,
+        Upsert,
+        Merge,
+        Delete,
+        Drop
     }
 }

@@ -11,13 +11,12 @@ namespace SocialTalents.MongoSync.Console.Model
             Program.Console("Usage:");
             Program.Console("SocialTalents.MongoSync.Console <command> --conn Connection [--file file] [--collection collection] [--query 'query']");
             Program.Console("command        help    Display help");
-            Program.Console("               Insert  insert file(s) specified");
-            Program.Console("               Upsert  Upsert file(s) specified");
-            Program.Console("               Merge   Merge file(s) specified");
+            Program.Console("               Import  process file(s) specified");
             Program.Console("               Export  Export collection to file (using optional query)");
-            Program.Console("connection     mongodb Connection String ");
-            Program.Console("file           file or files to use, e.g. countries.json or *.json ");
-            Program.Console("query          Query to use to select data, default is '{}'");
+            Program.Console("connection     mongodb Connection String");
+            Program.Console("file           file or files to use, e.g. countries.json or *.json");
+            Program.Console("               File name format: [Order].[Collection].[ImportMode].json");
+            Program.Console("query          Query to use to export data, default is '{}'");
         }
 
         public override void Parse(string[] args)

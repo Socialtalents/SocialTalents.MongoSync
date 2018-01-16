@@ -30,9 +30,8 @@ namespace SocialTalents.MongoSync.XUnit
 
         [Theory]
         [InlineData("help", typeof(HelpCommand), CommandType.Help)]
-        [InlineData("insert", typeof(ImportCommand), CommandType.Insert)]
-        //[InlineData("Merge", typeof(ImportCommand), CommandType.Merge)]
-        //[InlineData("UPSERT", typeof(ImportCommand), CommandType.Upsert)]
+        [InlineData("IMPORT", typeof(ImportCommand), CommandType.Import)]
+        [InlineData("import", typeof(ImportCommand), CommandType.Import)]
         [InlineData("eXport", typeof(ExportCommand), CommandType.Export)]
         public void ParseCommand_Type(string commandName, Type t, CommandType type)
         {
@@ -74,7 +73,7 @@ namespace SocialTalents.MongoSync.XUnit
             c.Execute();
 
             Assert.Equal(ExportCommand.COMMAND, executable);
-            Assert.Equal($"--host host --db database --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.json", arguments);
+            Assert.Equal($"--host host --db database --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
         }
 
         [Fact]

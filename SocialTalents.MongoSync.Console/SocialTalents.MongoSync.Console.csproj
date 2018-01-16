@@ -7,9 +7,13 @@
 
   <ItemGroup>
     <None Remove="MongoSync.bat" />
+    <None Remove="MongoSync.sh" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="MongoSync.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="MongoSync.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

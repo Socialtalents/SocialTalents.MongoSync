@@ -1,0 +1,1 @@
+dotnet bin/SocialTalents.MongoSync.Console.dll "$@"

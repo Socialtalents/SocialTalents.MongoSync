@@ -1,8 +1,7 @@
 {
   "profiles": {
     "SocialTalents.MongoSync.Console": {
-      "commandName": "Project",
-      "commandLineArgs": "export -conn mongodb://masterDev:BfkvYBJA9LfCLR6u@127.0.0.1:29017/master"
+      "commandName": "Project"
     }
   }
 }

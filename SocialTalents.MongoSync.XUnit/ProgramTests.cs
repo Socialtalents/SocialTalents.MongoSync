@@ -31,8 +31,8 @@ namespace SocialTalents.MongoSync.XUnit
         [Theory]
         [InlineData("help", typeof(HelpCommand), CommandType.Help)]
         [InlineData("insert", typeof(ImportCommand), CommandType.Insert)]
-        [InlineData("Merge", typeof(ImportCommand), CommandType.Merge)]
-        [InlineData("UPSERT", typeof(ImportCommand), CommandType.Upsert)]
+        //[InlineData("Merge", typeof(ImportCommand), CommandType.Merge)]
+        //[InlineData("UPSERT", typeof(ImportCommand), CommandType.Upsert)]
         [InlineData("eXport", typeof(ExportCommand), CommandType.Export)]
         public void ParseCommand_Type(string commandName, Type t, CommandType type)
         {
@@ -42,11 +42,12 @@ namespace SocialTalents.MongoSync.XUnit
         }
 
         [Fact]
+        // Local mongodb must be accessble for this test to succeed
         public void ValidImport()
         {
             Command c = new ImportCommand();
-            c.Parse("--conn mongocon --file *.json".Split(' '));
-            Assert.Equal("mongocon", c.Connection);
+            c.Parse("--conn mongodb://localhost:27017/test --file *.json".Split(' '));
+            Assert.Equal("mongodb://localhost:27017/test", c.Connection);
             Assert.Equal("*.json", c.File);
             c.Validate();
         }

@@ -6,3 +6,5 @@
 **/bin/
 **/obj/
 *.user
+# local test data
+/SocialTalents.MongoSync.Console/636*.json

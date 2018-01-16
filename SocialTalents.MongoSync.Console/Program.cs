@@ -11,6 +11,7 @@ namespace SocialTalents.MongoSync.Console
         {
             Command cmd = ParseCommand(args);
             cmd.Validate();
+
             cmd.Execute();
         }
 
@@ -19,16 +20,20 @@ namespace SocialTalents.MongoSync.Console
         {
             Console("executing mongo command...");
             Console($"{cmd} {arg}");
+
             ProcessStartInfo startInfo = new ProcessStartInfo(cmd, arg);
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
             startInfo.UseShellExecute = false;
             startInfo.CreateNoWindow = true;
+
             Process proc = new Process();
             proc.StartInfo = startInfo;
             proc.Start();
+
             var output = proc.StandardOutput.ReadToEnd();
             var error = proc.StandardError.ReadToEnd();
+
             Console($"Execution completed with state {proc.ExitCode}");
             Console(output);
             Console(error);
@@ -49,8 +54,8 @@ namespace SocialTalents.MongoSync.Console
                     {
                         case CommandType.Help: candidate = new HelpCommand(); break;
                         case CommandType.Insert:
-                        case CommandType.Merge:
-                        case CommandType.Upsert:
+                        // not supported yet case CommandType.Merge:
+                        // not supported yet case CommandType.Upsert:
                             candidate = new ImportCommand(); break;
                         case CommandType.Export:
                             candidate = new ExportCommand(); break;

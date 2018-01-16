@@ -10,8 +10,7 @@ namespace SocialTalents.MongoSync.Console.Model
         public CommandType CommandType { get; set; }
 
         public string File { get; set; }
-        public string SearchQueryForExport { get; set; }
-
+        
         public virtual void Execute()
         {
             throw new NotImplementedException();
@@ -47,7 +46,7 @@ namespace SocialTalents.MongoSync.Console.Model
             }
         }
 
-        public virtual bool IsValid()
+        public virtual void Validate()
         {
             throw new NotImplementedException("Need to be overriden");
         }
@@ -56,8 +55,6 @@ namespace SocialTalents.MongoSync.Console.Model
         {
             var result = new Dictionary<string, Action<Command, string>>();
             result.Add("--conn", (cmd, arg) => cmd.Connection = arg);
-            result.Add("--file", (cmd, arg) => cmd.File = arg);
-            result.Add("--query", (cmd, arg) => cmd.SearchQueryForExport = arg);
             return result;
         }
     }

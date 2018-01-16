@@ -48,24 +48,48 @@ namespace SocialTalents.MongoSync.XUnit
             c.Parse("--conn mongocon --file *.json".Split(' '));
             Assert.Equal("mongocon", c.Connection);
             Assert.Equal("*.json", c.File);
-            Assert.True(c.IsValid());
+            c.Validate();
         }
 
         [Fact]
         public void ValidExport()
         {
-            Command c = new ExportCommand();
-            c.Parse("--conn mongocon --file 3.Countries.json --query {}".Split(' '));
+            var c = new ExportCommand();
+            c.Parse("--conn mongocon --query {} --collection countries".Split(' '));
             Assert.Equal("mongocon", c.Connection);
-            Assert.Equal("3.Countries.json", c.File);
             Assert.Equal("{}", c.SearchQueryForExport);
-            Assert.True(c.IsValid());
+            Assert.Equal("countries", (c as ExportCommand).CollectionName);
+            c.Validate();
+        }
+
+        [Fact]
+        public void Export_Execute()
+        {
+            string executable = null;
+            string arguments = null;
+            Program.Exec = (cmd, args) => { executable = cmd; arguments = args; return 127; };
+            var c = new ExportCommand();
+            c.Parse("--conn host/database --collection Countries --query {a:1}".Split(' '));
+            c.Execute();
+
+            Assert.Equal(ExportCommand.COMMAND, executable);
+            Assert.Equal($"--host host --db database --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.json", arguments);
+        }
+
+        [Fact]
+        public void NotValidExport_CollectionMissing()
+        {
+            var c = new ExportCommand();
+            c.Parse("--conn mongocon --query {}".Split(' '));
+            Assert.Equal("mongocon", c.Connection);
+            Assert.Equal("{}", c.SearchQueryForExport);
+            Assert.Throws<ArgumentException>(() => c.Validate());
         }
 
         [Fact]
         public void DefaultCommand_IsValid_RequiresImplementation()
         {
-            Assert.Throws<NotImplementedException>(() => new Command().IsValid());
+            Assert.Throws<NotImplementedException>(() => new Command().Validate());
         }
     }
 }

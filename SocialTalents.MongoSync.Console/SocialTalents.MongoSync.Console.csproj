@@ -6,6 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MongoSync.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MongoSync.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.5.0" />
   </ItemGroup>
 

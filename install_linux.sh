@@ -2,4 +2,4 @@ wget https://github.com/Socialtalents/SocialTalents.MongoSync/raw/master/SocialT
 # you might need to install unzip
 # sudo apt-get install unzip
 unzip Release.zip -d bin/
-cp bin/mongosync.sh .
+cp bin/MongoSync.sh ./mongosync.sh

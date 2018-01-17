@@ -31,6 +31,8 @@ namespace SocialTalents.MongoSync.Console
             proc.StartInfo = startInfo;
             proc.Start();
 
+            proc.WaitForExit();
+
             var output = proc.StandardOutput.ReadToEnd();
             var error = proc.StandardError.ReadToEnd();
 

@@ -73,3 +73,7 @@ sh mongosync.sh import --conn mongodb://user:password@127.0.0.1:29017/database
 ```
 
 For vsts, we use "Run shell commands or a script on a remote machine using SSH" step as Agent phase so it executed only once.
+
+# Issues
+
+Known issue: windows script contains hardcoded path to mongo 3.6 folder, you need to fix it manually or add mongo to path

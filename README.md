@@ -60,7 +60,11 @@ printjson(db.getCollectionNames());
 
 # Deployment
 
-Here is script for linux, but for windows logic is the same. Navigate to folder with scripts and json files, install mongosync tool, run import.
+Here is script for linux, but for windows logic is the same. 
+
+Navigate to folder with scripts and json files, install mongosync tool, run import.
+
+In case you need to install dotnet core follow first 2 steps from official documentation: https://www.microsoft.com/net/learn/get-started/linuxubuntu 
 
 ```
 cd /MongoSync

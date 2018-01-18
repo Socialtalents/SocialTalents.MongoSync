@@ -47,7 +47,8 @@ namespace SocialTalents.MongoSync.Console.Model
         public string ToCommandLine()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append($"--host {Host} --db {Database}");
+            // mongo.exe requires databasename as first paramater, in this way it is easier to fix parameters
+            sb.Append($"--db {Database} --host {Host}");
             if (!string.IsNullOrEmpty(UserName))
             {
                 sb.Append($" --username {UserName}");

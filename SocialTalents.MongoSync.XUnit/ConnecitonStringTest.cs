@@ -9,16 +9,17 @@ namespace SocialTalents.MongoSync.XUnit
     public class ConnecitonStringTest
     {
         [Theory]
+        // mongo.exe requires databasename as first paramater, in this way it is easier to fix parameters
         [InlineData("mongodb://masterDev:BfkvYB@127.0.0.1:28017/master", "127.0.0.1:28017", "masterDev", "BfkvYB", "master",
-            "--host 127.0.0.1:28017 --db master --username masterDev --password BfkvYB")]
+            "--db master --host 127.0.0.1:28017 --username masterDev --password BfkvYB")]
         [InlineData("mongodb://masterDev:BfkvYB@127.0.0.1/master", "127.0.0.1", "masterDev", "BfkvYB", "master",
-            "--host 127.0.0.1 --db master --username masterDev --password BfkvYB")]
+            "--db master --host 127.0.0.1 --username masterDev --password BfkvYB")]
         [InlineData("mongodb://masterDev@127.0.0.1:28017/master", "127.0.0.1:28017", "masterDev", null, "master",
-            "--host 127.0.0.1:28017 --db master --username masterDev")]
+            "--db master --host 127.0.0.1:28017 --username masterDev")]
         [InlineData("mongodb://127.0.0.1:28017/master", "127.0.0.1:28017", null, null, "master"
-            , "--host 127.0.0.1:28017 --db master")]
+            , "--db master --host 127.0.0.1:28017")]
         [InlineData("masterDev:BfkvYB@127.0.0.1:28017/master", "127.0.0.1:28017", "masterDev", "BfkvYB", "master"
-            , "--host 127.0.0.1:28017 --db master --username masterDev --password BfkvYB")]
+            , "--db master --host 127.0.0.1:28017 --username masterDev --password BfkvYB")]
         public void TestParsing(string input, string host, string user, string password, string database, string expectedCommandLine)
         {
             var c = new ConnectionString(input);

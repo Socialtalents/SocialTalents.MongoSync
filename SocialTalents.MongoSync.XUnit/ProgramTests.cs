@@ -47,7 +47,7 @@ namespace SocialTalents.MongoSync.XUnit
             Command c = new ImportCommand();
             c.Parse("--conn mongodb://localhost:27017/test --file *.json".Split(' '));
             Assert.Equal("mongodb://localhost:27017/test", c.Connection);
-            Assert.Equal("*.json", c.File);
+            Assert.Equal("*.json", (c as ImportCommand).FilesFilter);
             c.Validate();
         }
 
@@ -73,7 +73,7 @@ namespace SocialTalents.MongoSync.XUnit
             c.Execute();
 
             Assert.Equal(ExportCommand.COMMAND, executable);
-            Assert.Equal($"--host host --db database --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
+            Assert.Equal($"--db database --host host --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
         }
 
         [Fact]

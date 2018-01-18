@@ -12,11 +12,14 @@ namespace SocialTalents.MongoSync.Console.Model
     {
         public ImportCommand()
         {
-            File = "*.json";
+            // to cover .js and .json
+            FilesFilter = "*.js*";
             ReadCompletedImports = ReadCompletedImportsDefault;
+            ConnectToMongoDb = ConnectToMongoDbDefault;
         }
 
         public ConnectionString ConnectionString { get; set; }
+        public string FilesFilter { get; set; }
 
         public override void Execute()
         {
@@ -24,8 +27,7 @@ namespace SocialTalents.MongoSync.Console.Model
             {
                 Dictionary<string, SyncEntity> completedImports = ReadCompletedImports();
 
-                DirectoryInfo di = new DirectoryInfo(".");
-                var allFiles = di.GetFiles(File);
+                var allFiles = ReadFiles(FilesFilter);
                 Program.Console($"Found {allFiles.Length} files to import");
                 foreach (var f in allFiles.OrderBy(f => f.Name))
                 {
@@ -62,10 +64,17 @@ namespace SocialTalents.MongoSync.Console.Model
                             case ImportMode.Insert:
                             case ImportMode.Upsert:
                             case ImportMode.Merge:
-                                var resultCode = Program.Exec(COMMAND, $"{ConnectionString.ToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
+                                var resultCode = Program.Exec(IMPORT_COMMAND, $"{ConnectionString.ToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
                                 if (resultCode != 0)
                                 {
                                     throw new InvalidOperationException($"mongoimport result code {resultCode}, interrupting");
+                                }
+                                break;
+                            case ImportMode.Eval:
+                                var evalResultCode = Program.Exec(MONGO_COMMAND, $"{ConnectionString.ToCommandLine().Replace("--db ", "")} {f.Name}");
+                                if (evalResultCode != 0)
+                                {
+                                    throw new InvalidOperationException($"mongo result code {evalResultCode}, interrupting");
                                 }
                                 break;
                             default: throw new InvalidOperationException($"Import mode {importMode} not implemented yet");
@@ -108,10 +117,14 @@ namespace SocialTalents.MongoSync.Console.Model
 
         }
 
-        public const string COMMAND = "mongoimport";
+        public const string IMPORT_COMMAND = "mongoimport";
+        public const string MONGO_COMMAND = "mongo";
         public const string SyncCollectionName = "_mongoSync";
 
         public Func<Dictionary<string, SyncEntity>> ReadCompletedImports { get; set; }
+        public Func<string, FileInfo[]> ReadFiles { get; set; } = (fileFilter) => new DirectoryInfo(".").GetFiles(fileFilter);
+        public Func<string, string, IMongoDatabase> ConnectToMongoDb { get; set; }
+
         public IMongoDatabase MongoDatabase { get; private set; }
         public IMongoCollection<SyncEntity> SyncCollection { get; private set; }
 
@@ -128,7 +141,7 @@ namespace SocialTalents.MongoSync.Console.Model
         protected override Dictionary<string, Action<Command, string>> ParsingRules()
         {
             var result = base.ParsingRules();
-            result.Add("--file", (cmd, arg) => cmd.File = arg);
+            result.Add("--file", (cmd, arg) => (cmd as ImportCommand).FilesFilter = arg);
             return result;
         }
 
@@ -138,16 +151,21 @@ namespace SocialTalents.MongoSync.Console.Model
             {
                 throw new ArgumentException("Connection parameter required for import command");
             }
-            if (string.IsNullOrEmpty(File))
+            if (string.IsNullOrEmpty(FilesFilter))
             {
                 throw new ArgumentException("Connection parameter required for import command");
             }
             ConnectionString = new ConnectionString(Connection);
 
             // try to connect
-            var mongoClient = new MongoClient(Connection);
-            MongoDatabase = mongoClient.GetDatabase(ConnectionString.Database);
+            MongoDatabase = ConnectToMongoDb(Connection, ConnectionString.Database);
             SyncCollection = MongoDatabase.GetCollection<SyncEntity>(SyncCollectionName);
+        }
+
+        private IMongoDatabase ConnectToMongoDbDefault(string connection, string databaseName)
+        {
+            var mongoClient = new MongoClient(Connection);
+            return mongoClient.GetDatabase(ConnectionString.Database);
         }
     }
 }

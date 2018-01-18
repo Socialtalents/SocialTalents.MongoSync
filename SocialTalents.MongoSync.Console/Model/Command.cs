@@ -8,8 +8,6 @@ namespace SocialTalents.MongoSync.Console.Model
     {
         public string Connection { get; set; }
         public CommandType CommandType { get; set; }
-
-        public string File { get; set; }
         
         public virtual void Execute()
         {

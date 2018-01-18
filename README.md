@@ -1,4 +1,3 @@
-
 # SocialTalents.MongoSync
 MongoDb data sync tool
 
@@ -21,6 +20,15 @@ Execute following command to export some query collection:
 MongoSync export --conn localhost/database --collection Config --query {myProperty:2}
 ```
 
+It is getting more tricky when you want to use quotes. For windows, use single quotation. For linux, you have to escape them with \:
+```
+#windows
+MongoSync export --conn localhost/database --collection Config --query {myProperty:'argument'}
+#linux
+MongoSync export --conn localhost/database --collection Config --query {myProperty:\'argument\'}
+```
+
+
 MongoSync will generate file which you need to include within your deployment, e.g:
 `636517244.Config.Insert.json`
 
@@ -39,8 +47,16 @@ File content:
 ```
 
 ## Drop colleciton
-`636517244.Config.Drop.json`
+```
+636517244.Config.Drop.json
 (File content ignored)
+````
+
+## Eval any javascript
+```
+636517244.Config.eval.json
+printjson(db.getCollectionNames());
+```
 
 # Deployment
 

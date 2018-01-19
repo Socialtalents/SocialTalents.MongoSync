@@ -1,5 +1,7 @@
 # SocialTalents.MongoSync
-MongoDb data sync tool
+MongoDb data sync tool, inspired by Liquibase.
+Supports inserts, updates, drop, delete, and eval of any script.
+Works for Mongo 3.4+ or later.
 
 # Installation in dev environment (windows)
 

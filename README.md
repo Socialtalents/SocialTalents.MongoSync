@@ -14,20 +14,20 @@ Works for Mongo 3.4+ or later.
 
 Execute following command to export whole collection:
 ```
-MongoSync export --conn localhost/database --collection Config 
+MongoSync export --conn mongodb://localhost/database --collection Config 
 ```
 
 Execute following command to export some query collection:
 ```
-MongoSync export --conn localhost/database --collection Config --query {myProperty:2}
+MongoSync export --conn mongodb://localhost/database --collection Config --query {myProperty:2}
 ```
 
 It is getting more tricky when you want to use quotes. For windows, use single quotation. For linux, you have to escape them with \:
 ```
 #windows
-MongoSync export --conn localhost/database --collection Config --query {myProperty:'argument'}
+MongoSync export --conn mongodb://localhost/database --collection Config --query {myProperty:'argument'}
 #linux
-MongoSync export --conn localhost/database --collection Config --query {myProperty:\'argument\'}
+MongoSync export --conn mongodb://localhost/database --collection Config --query {myProperty:\'argument\'}
 ```
 
 
@@ -56,7 +56,7 @@ File content:
 
 ## Eval any javascript
 ```
-636517244.Config.eval.json
+636517244.Config.eval.js
 printjson(db.getCollectionNames());
 ```
 

@@ -1,12 +1,10 @@
 ﻿using SocialTalents.MongoSync.Console.Model;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace SocialTalents.MongoSync.XUnit
 {
-    public class ConnecitonStringTest
+    public class ConnectionStringTest
     {
         [Theory]
         // mongo.exe requires databasename as first paramater, in this way it is easier to fix parameters

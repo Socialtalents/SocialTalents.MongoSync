@@ -1,54 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Text;
+using MongoDB.Driver;
+using MongoConnectionString = MongoDB.Driver.Core.Configuration.ConnectionString;
 
 namespace SocialTalents.MongoSync.Console.Model
 {
     public class ConnectionString
     {
+        private readonly MongoConnectionString _connectionString;
+
         public ConnectionString(string connection)
         {
-            connection = connection.Replace("mongodb://", "");
-            string[] splitByAt = connection.Split('@');
-            // has username / password
-            if (splitByAt.Length > 1)
-            {
-                var usernameAndPassword = splitByAt[0].Split(':');
-                UserName = usernameAndPassword[0];
-                if (usernameAndPassword.Length > 1)
-                {
-                    Password = usernameAndPassword[1];
-                }
-                fillHostAndDb(splitByAt[1]);
-            }
-            else
-            {
-                fillHostAndDb(splitByAt[0]);
-            }
-        }
+            try { _connectionString = new MongoConnectionString(connection); }
+            catch (MongoConfigurationException exception) { throw new ArgumentException(exception.Message); }
 
-        private void fillHostAndDb(string connectionStringAfterAt)
-        {
-            var splitBySlash = connectionStringAfterAt.Split('/');
-            if (splitBySlash.Length != 2)
-            {
+            if(Database == null)
                 throw new ArgumentException("Connection string should have a database name in it, e.g. localhost/mydatabase");
-            }
-
-            Host = splitBySlash[0];
-            Database = splitBySlash[1];
         }
 
-        public string Database { get; set; }
-        public string Password { get; set; }
-        public string Host { get; set; }
-        public string UserName { get; set; }
+        public string UserName => _connectionString.Username;
+        public string Password => _connectionString.Password;
+
+        public string Database => _connectionString.DatabaseName;
+        public IEnumerable<string> Hosts => _connectionString.Hosts.Select(endPoint =>
+            endPoint is DnsEndPoint dnsEndPoint
+                ? $"{dnsEndPoint.Host}:{dnsEndPoint.Port}"
+                : $"{endPoint}"
+        );
 
         public string ToCommandLine()
         {
             StringBuilder sb = new StringBuilder();
-            // mongo.exe requires databasename as first paramater, in this way it is easier to fix parameters
-            sb.Append($"--db {Database} --host {Host}");
+            // mongo.exe requires database name as first parameter, in this way it is easier to fix parameters
+            sb.Append($"--db {Database}");
+
+            // https://docs.mongodb.com/manual/reference/program/mongo/#cmdoption-mongo-host
+            var hostOrReplica = string.IsNullOrEmpty(_connectionString.ReplicaSet)
+                ? Hosts.First()
+                : $"{_connectionString.ReplicaSet}/{string.Join(",", Hosts)}";
+            sb.Append($" --host {hostOrReplica}");
+
             if (!string.IsNullOrEmpty(UserName))
             {
                 sb.Append($" --username {UserName}");

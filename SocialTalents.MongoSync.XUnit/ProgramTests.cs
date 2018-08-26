@@ -69,11 +69,11 @@ namespace SocialTalents.MongoSync.XUnit
             string arguments = null;
             Program.Exec = (cmd, args) => { executable = cmd; arguments = args; return 127; };
             var c = new ExportCommand();
-            c.Parse("--conn host/database --collection Countries --query {a:1}".Split(' '));
+            c.Parse("--conn mongodb://host:28123/database --collection Countries --query {a:1}".Split(' '));
             c.Execute();
 
             Assert.Equal(ExportCommand.COMMAND, executable);
-            Assert.Equal($"--db database --host host --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
+            Assert.Equal($"--db database --host host:28123 --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
         }
 
         [Fact]

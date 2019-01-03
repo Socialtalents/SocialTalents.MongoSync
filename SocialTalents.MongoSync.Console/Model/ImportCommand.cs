@@ -77,6 +77,27 @@ namespace SocialTalents.MongoSync.Console.Model
                                     throw new InvalidOperationException($"mongo result code {evalResultCode}, interrupting");
                                 }
                                 break;
+                            case ImportMode.CreateIndex:
+                                var text = File.ReadAllText(f.FullName);
+
+                                var command = string.Format(CREATE_INDEX, collectionName, text);
+                                // Path.GetTempFileName() can't set extension
+                                var fileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".js");
+                                File.WriteAllText(fileName, command);
+
+                                try
+                                {
+                                    var createIndexResultCode = Program.Exec(MONGO_COMMAND, $"{ConnectionString.ToCommandLine().Replace("--db ", "")} {fileName}");
+                                    if (createIndexResultCode != 0)
+                                    {
+                                        throw new InvalidOperationException($"CreateIndex result code {createIndexResultCode}, interrupting");
+                                    }
+                                }
+                                finally
+                                {
+                                    File.Delete(fileName);
+                                }                                                              
+                                break;
                             default: throw new InvalidOperationException($"Import mode {importMode} not implemented yet");
                         }
                         importResult.Success = true;
@@ -91,6 +112,7 @@ namespace SocialTalents.MongoSync.Console.Model
             catch (Exception ex)
             {
                 Program.Console($"Error during import: {ex.Message}");
+                Environment.Exit(1);
             }
         }
 
@@ -120,6 +142,8 @@ namespace SocialTalents.MongoSync.Console.Model
         public const string IMPORT_COMMAND = "mongoimport";
         public const string MONGO_COMMAND = "mongo";
         public const string SyncCollectionName = "_mongoSync";
+
+        private const string CREATE_INDEX = "if(db.{0}.createIndex({1}).ok!=1){{quit(101)}}";
 
         public Func<Dictionary<string, SyncEntity>> ReadCompletedImports { get; set; }
         public Func<string, FileInfo[]> ReadFiles { get; set; } = (fileFilter) => new DirectoryInfo(".").GetFiles(fileFilter);

@@ -80,23 +80,33 @@ namespace SocialTalents.MongoSync.Console.Model
                             case ImportMode.CreateIndex:
                                 var text = File.ReadAllText(f.FullName);
 
+                                Program.Console("Index params:");
+                                Program.Console(text);
+
                                 var command = string.Format(CREATE_INDEX, collectionName, text);
-                                // Path.GetTempFileName() can't set extension
                                 var fileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".js");
                                 File.WriteAllText(fileName, command);
 
                                 try
                                 {
                                     var createIndexResultCode = Program.Exec(MONGO_COMMAND, $"{ConnectionString.ToCommandLine().Replace("--db ", "")} {fileName}");
-                                    if (createIndexResultCode != 0)
+                                    switch (createIndexResultCode)
                                     {
-                                        throw new InvalidOperationException($"CreateIndex result code {createIndexResultCode}, interrupting");
+                                        // no error
+                                        case 0:
+                                            break;
+                                        case 11000:
+                                            throw new InvalidOperationException($"CreateIndex failed with error 'duplicate key error', interrupting");
+                                        default:
+                                            // all error codes with explanation
+                                            // https://github.com/mongodb/mongo/blob/master/src/mongo/base/error_codes.err
+                                            throw new InvalidOperationException($"CreateIndex result code {createIndexResultCode}, interrupting");
                                     }
                                 }
                                 finally
                                 {
                                     File.Delete(fileName);
-                                }                                                              
+                                }
                                 break;
                             default: throw new InvalidOperationException($"Import mode {importMode} not implemented yet");
                         }
@@ -143,7 +153,7 @@ namespace SocialTalents.MongoSync.Console.Model
         public const string MONGO_COMMAND = "mongo";
         public const string SyncCollectionName = "_mongoSync";
 
-        private const string CREATE_INDEX = "if(db.{0}.createIndex({1}).ok!=1){{quit(101)}}";
+        private const string CREATE_INDEX = "var r = db.{0}.createIndex({1}); if(r.ok!=1) {{quit(r.code)}}";
 
         public Func<Dictionary<string, SyncEntity>> ReadCompletedImports { get; set; }
         public Func<string, FileInfo[]> ReadFiles { get; set; } = (fileFilter) => new DirectoryInfo(".").GetFiles(fileFilter);

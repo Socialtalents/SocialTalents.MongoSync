@@ -1,0 +1,8 @@
+{
+    "profiles": {
+        "SocialTalents.MongoSync.Console": {
+            "commandName": "Project",
+            "commandLineArgs": "import --conn mongodb://127.0.0.1:27027/SkyHiveV3"
+        }
+    }
+}

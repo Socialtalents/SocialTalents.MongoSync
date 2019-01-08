@@ -12,6 +12,7 @@ namespace SocialTalents.MongoSync.Console.Model
         Merge,
         Delete,
         Drop,
-        Eval
+        Eval,
+        CreateIndex
     }
 }

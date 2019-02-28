@@ -1,6 +1,6 @@
 # SocialTalents.MongoSync
 MongoDb data sync tool, inspired by Liquibase.
-Supports inserts, updates, drop, delete, and eval of any script.
+Supports inserts, updates, drop, delete, create index, and eval of any script.
 Works for Mongo 3.4+ or later.
 
 # Installation in dev environment (windows)
@@ -34,7 +34,7 @@ MongoSync export --conn mongodb://localhost/database --collection Config --query
 MongoSync will generate file which you need to include within your deployment, e.g:
 `636517244.Config.Insert.json`
 
-3rd compnent define operation. You can rename file to use different insert mode (see mongoimport documentation):
+3rd component define operation. You can rename file to use different insert mode (see mongoimport documentation):
 ```
 636517244.Config.Upsert.json
 636517244.Config.Merge.json
@@ -53,6 +53,13 @@ File content:
 636517244.Config.Drop.json
 (File content ignored)
 ````
+
+## CreateIndex
+Add file with an index definition in body:
+```
+636517244.Config.CreateIndex.js
+{ Type: 1, IndexKey: 1 }, { unique: true, partialFilterExpression: { IndexKey: { $exists: true } } }
+```
 
 ## Eval any javascript
 ```

@@ -7,6 +7,14 @@ namespace SocialTalents.MongoSync.Console.Model
     public class Command
     {
         public string Connection { get; set; }
+        public string AuthenticationDatabase { get; set; }
+        public string AuthenticationDatabaseToCommandLine()
+        {
+            if (string.IsNullOrEmpty(AuthenticationDatabase)) {
+                return string.Empty;
+            }
+            return $" --authenticationDatabase {AuthenticationDatabase}";
+        }
         public CommandType CommandType { get; set; }
         
         public virtual void Execute()
@@ -52,6 +60,7 @@ namespace SocialTalents.MongoSync.Console.Model
         protected virtual Dictionary<string, Action<Command, string>> ParsingRules()
         {
             var result = new Dictionary<string, Action<Command, string>>();
+            result.Add("--authenticationdatabase", (cmd, arg) => cmd.AuthenticationDatabase = arg);
             result.Add("--uri", (cmd, arg) => cmd.Connection = arg);
             result.Add("--conn", (cmd, arg) =>
             {

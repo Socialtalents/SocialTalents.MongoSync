@@ -41,7 +41,8 @@ namespace SocialTalents.MongoSync.Console.Model
 
         public override void Execute()
         {
-            string argument = $"--uri {Connection} --collection {CollectionName} --query {SearchQueryForExport} --type json " +
+            ConnectionString c = new ConnectionString(Connection);
+            string argument = $"{c.ToCommandLine()}{AuthenticationDatabaseToCommandLine()} --collection {CollectionName} --query {SearchQueryForExport} --type json " +
                 // assuming no chance to generate more than 1 file per 10 seconds
                 $"--out {TimePrefix}.{CollectionName}.Insert.json";
 

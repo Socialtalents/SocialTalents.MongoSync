@@ -64,7 +64,7 @@ namespace SocialTalents.MongoSync.Console.Model
                             case ImportMode.Insert:
                             case ImportMode.Upsert:
                             case ImportMode.Merge:
-                                var resultCode = Program.Exec(IMPORT_COMMAND, $"--uri {Connection} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
+                                var resultCode = Program.Exec(IMPORT_COMMAND, $"{ConnectionString.ToCommandLine()}{AuthenticationDatabaseToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
                                 if (resultCode != 0)
                                 {
                                     throw new InvalidOperationException($"mongoimport result code {resultCode}, interrupting");

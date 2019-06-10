@@ -63,7 +63,21 @@ namespace SocialTalents.MongoSync.XUnit
         }
 
         [Fact]
-        public void Export_Execute()
+        public void Export_Execute_Atlas()
+        {
+            string executable = null;
+            string arguments = null;
+            Program.Exec = (cmd, args) => { executable = cmd; arguments = args; return 127; };
+            var c = new ExportCommand();
+            c.Parse("--uri mongodb://user:password@host:28123,host2:28125/database?replicaSet=Atlas1-shard-0&ssl=true true --collection Countries --query {a:1} --authenticationDatabase admin".Split(' '));
+            c.Execute();
+
+            Assert.Equal(ExportCommand.COMMAND, executable);
+            Assert.Equal($"--db database --host Atlas1-shard-0/host:28123,host2:28125 --username user --password password --ssl --authenticationDatabase admin --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
+        }
+
+        [Fact]
+        public void Export_Execute_Simple()
         {
             string executable = null;
             string arguments = null;

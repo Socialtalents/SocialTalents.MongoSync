@@ -52,7 +52,16 @@ namespace SocialTalents.MongoSync.Console.Model
         protected virtual Dictionary<string, Action<Command, string>> ParsingRules()
         {
             var result = new Dictionary<string, Action<Command, string>>();
-            result.Add("--conn", (cmd, arg) => cmd.Connection = arg);
+            result.Add("--uri", (cmd, arg) => cmd.Connection = arg);
+            result.Add("--conn", (cmd, arg) =>
+            {
+                // Backward compatibility parameter
+                if (cmd.Connection != null)
+                {
+                    throw new ArgumentException("Cannot use both --uri or --conn argument, please use --uri");
+                } 
+                cmd.Connection = arg;
+            });
             return result;
         }
     }

@@ -51,6 +51,11 @@ namespace SocialTalents.MongoSync.Console.Model
                     sb.Append($" --password {Password}");
                 }
             }
+
+            if (_connectionString.Ssl.HasValue && _connectionString.Ssl.Value)
+            {
+                sb.Append(" --ssl");
+            }
             return sb.ToString();
         }
     }

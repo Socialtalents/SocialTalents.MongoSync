@@ -45,7 +45,7 @@ namespace SocialTalents.MongoSync.XUnit
         public void ValidImport()
         {
             Command c = new ImportCommand();
-            c.Parse("--conn mongodb://localhost:27017/test --file *.json".Split(' '));
+            c.Parse("--uri mongodb://localhost:27017/test --file *.json".Split(' '));
             Assert.Equal("mongodb://localhost:27017/test", c.Connection);
             Assert.Equal("*.json", (c as ImportCommand).FilesFilter);
             c.Validate();
@@ -55,7 +55,7 @@ namespace SocialTalents.MongoSync.XUnit
         public void ValidExport()
         {
             var c = new ExportCommand();
-            c.Parse("--conn mongocon --query {} --collection countries".Split(' '));
+            c.Parse("--uri mongocon --query {} --collection countries".Split(' '));
             Assert.Equal("mongocon", c.Connection);
             Assert.Equal("{}", c.SearchQueryForExport);
             Assert.Equal("countries", (c as ExportCommand).CollectionName);
@@ -63,13 +63,27 @@ namespace SocialTalents.MongoSync.XUnit
         }
 
         [Fact]
-        public void Export_Execute()
+        public void Export_Execute_Atlas()
         {
             string executable = null;
             string arguments = null;
             Program.Exec = (cmd, args) => { executable = cmd; arguments = args; return 127; };
             var c = new ExportCommand();
-            c.Parse("--conn mongodb://host:28123/database --collection Countries --query {a:1}".Split(' '));
+            c.Parse("--uri mongodb://user:password@host:28123,host2:28125/database?replicaSet=Atlas1-shard-0&ssl=true true --collection Countries --query {a:1} --authenticationDatabase admin".Split(' '));
+            c.Execute();
+
+            Assert.Equal(ExportCommand.COMMAND, executable);
+            Assert.Equal($"--db database --host Atlas1-shard-0/host:28123,host2:28125 --username user --password password --ssl --authenticationDatabase admin --collection Countries --query {{a:1}} --type json --out {c.TimePrefix}.Countries.Insert.json", arguments);
+        }
+
+        [Fact]
+        public void Export_Execute_Simple()
+        {
+            string executable = null;
+            string arguments = null;
+            Program.Exec = (cmd, args) => { executable = cmd; arguments = args; return 127; };
+            var c = new ExportCommand();
+            c.Parse("--uri mongodb://host:28123/database --collection Countries --query {a:1}".Split(' '));
             c.Execute();
 
             Assert.Equal(ExportCommand.COMMAND, executable);
@@ -80,7 +94,7 @@ namespace SocialTalents.MongoSync.XUnit
         public void NotValidExport_CollectionMissing()
         {
             var c = new ExportCommand();
-            c.Parse("--conn mongocon --query {}".Split(' '));
+            c.Parse("--uri mongocon --query {}".Split(' '));
             Assert.Equal("mongocon", c.Connection);
             Assert.Equal("{}", c.SearchQueryForExport);
             Assert.Throws<ArgumentException>(() => c.Validate());

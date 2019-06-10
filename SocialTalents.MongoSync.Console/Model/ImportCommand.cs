@@ -64,14 +64,14 @@ namespace SocialTalents.MongoSync.Console.Model
                             case ImportMode.Insert:
                             case ImportMode.Upsert:
                             case ImportMode.Merge:
-                                var resultCode = Program.Exec(IMPORT_COMMAND, $"{ConnectionString.ToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
+                                var resultCode = Program.Exec(IMPORT_COMMAND, $"{ConnectionString.ToCommandLine()}{AuthenticationDatabaseToCommandLine()} --collection {collectionName} --type json --mode {importMode.ToString().ToLower()} --stopOnError --file {f.Name}");
                                 if (resultCode != 0)
                                 {
                                     throw new InvalidOperationException($"mongoimport result code {resultCode}, interrupting");
                                 }
                                 break;
                             case ImportMode.Eval:
-                                var evalResultCode = Program.Exec(MONGO_COMMAND, $"{ConnectionString.ToCommandLine().Replace("--db ", "")} {f.Name}");
+                                var evalResultCode = Program.Exec(MONGO_COMMAND, $"{Connection} {f.Name}");
                                 if (evalResultCode != 0)
                                 {
                                     throw new InvalidOperationException($"mongo result code {evalResultCode}, interrupting");
@@ -89,7 +89,7 @@ namespace SocialTalents.MongoSync.Console.Model
 
                                 try
                                 {
-                                    var createIndexResultCode = Program.Exec(MONGO_COMMAND, $"{ConnectionString.ToCommandLine().Replace("--db ", "")} {fileName}");
+                                    var createIndexResultCode = Program.Exec(MONGO_COMMAND, $"{Connection} {fileName}");
                                     switch (createIndexResultCode)
                                     {
                                         // no error

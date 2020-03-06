@@ -24,6 +24,9 @@ namespace SocialTalents.MongoSync.XUnit
         // parses replica set:
         [InlineData("mongodb://127.0.0.1:28018,127.0.0.1:28019/master?replicaSet=rs0", new []{"127.0.0.1:28018", "127.0.0.1:28019"}, null, null, "master"
             , "--db master --host rs0/127.0.0.1:28018,127.0.0.1:28019")]
+        // ssl on
+        [InlineData("mongodb://127.0.0.1:28018,127.0.0.1:28019/master?replicaSet=rs0&ssl=true", new[] { "127.0.0.1:28018", "127.0.0.1:28019" }, null, null, "master"
+            , "--db master --host rs0/127.0.0.1:28018,127.0.0.1:28019 --ssl")]
         public void TestParsing(string input, string[] hosts, string user, string password, string database, string expectedCommandLine)
         {
             var c = new ConnectionString(input);
